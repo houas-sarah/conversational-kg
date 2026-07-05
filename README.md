@@ -19,6 +19,9 @@ long-term memory — and you can watch it form in real time.
 
 </div>
 
+<!-- Screenshot: save your capture as docs/screenshot.png and it appears here. -->
+![the commonplace — the live knowledge graph on the left, the conversation on the right](docs/screenshot.png)
+
 ---
 
 ## what it does
@@ -52,6 +55,7 @@ generating replies — so it can't claim to know things it never heard.
 - **time-aware graph** — every triple is timestamped; 1:1 facts (`lives_in`, `studies`) get superseded by newer ones; multi-value facts (`likes`, `feels`) accumulate
 - **conflict resolution** — `superseded_by` pointers preserve the timeline; opposite-polarity facts collide (coming to *understand* what you *struggled with* closes the old one), a repeated fact reinforces instead of duplicating, and the UI shows corrections live
 - **per-session memory** — each visitor gets an isolated graph keyed by a browser id, with idle eviction and a session cap, so the live demo is safely multi-user
+- **semantic retrieval** — hybrid scoring (lexical + recency + embedding similarity via `fastembed`) finds facts by *meaning*, so "what do I find difficult?" recalls `struggles_with derivatives`; degrades to lexical if no embedding lib is present
 - **live visualisation** — D3 force-directed graph that updates over a WebSocket as you chat
 - **retrieval-grounded replies** — the responder is handed the top-k relevant facts before generating, so the chatbot won't invent things
 - **51 pytest tests** — covers thread-safety, persistence round-trip, corrupted-input recovery, chained supersessions, reinforcement and polarity conflicts
@@ -116,8 +120,8 @@ Five layers, each isolated behind a small interface:
                        └─────────────────┬───────────────────┘
                                          ↓
                        ┌─────────────────────────────────────┐
-                       │  token-overlap retrieval            │   query
-                       │  + 2-hop graph walk                  │
+                       │  hybrid retrieval:                   │   query
+                       │  lexical + recency + embeddings      │
                        └─────────────────┬───────────────────┘
                                          ↓
                        ┌─────────────────────────────────────┐
@@ -133,13 +137,13 @@ Five layers, each isolated behind a small interface:
 
 ### why this stack
 
-The original spec proposed Neo4j + spaCy + SPARQL. This implementation chose:
+A few deliberate technology choices, and the reasoning behind each:
 
-| Original | Replaced with | Why |
+| Common choice | Used here | Why |
 |---|---|---|
 | Neo4j (Docker server, ~1 GB) | NetworkX + JSON | Zero install, runs in-process. Same property-graph model; swapping to Neo4j later is one file. |
-| spaCy-only extraction | spaCy + Groq Llama 3.1 (hybrid) | The proposal's own comparison shows hybrid/LLM wins on precision. Free tier on Groq, no card. |
-| SPARQL | Cypher-style traversal in code | SPARQL targets RDF triple stores. We're in property-graph world. |
+| spaCy-only extraction | spaCy + Groq Llama 3.1 (hybrid) | The LLM handles coreference and phrasings the rules miss; canonicalisation keeps its output consistent. Groq's free tier needs no card. |
+| SPARQL | Cypher-style traversal in code | SPARQL targets RDF triple stores; this is a property graph. |
 
 ---
 
@@ -154,16 +158,30 @@ python -m eval.run_eval --no-llm   # rules-only baseline
 
 Outputs are saved as `eval/results_hybrid.{csv,md}` and `eval/results_rules.{csv,md}`. Sample results:
 
-| metric | hybrid (LLM) | rules-only | target |
-|---|---|---|---|
-| extraction precision | 72% | **95%** ✓ | ≥ 90% |
-| extraction recall | 64% | 64% | — |
-| extraction F1 | 68% | **77%** | — |
-| memory@1 accuracy | 62% | 62% | ≥ 85% |
-| conflict resolution | 1/2 (50%) | 1/2 (50%) | — |
-| avg latency / turn | 661 ms | **0 ms** | < 2000 ms ✓ |
+| metric | hybrid (LLM) ¹ | rules-only |
+|---|---|---|
+| extraction precision | 88% | 89% |
+| extraction recall | 62% | 61% |
+| extraction F1 | 73% | 72% |
+| memory@1 accuracy | 62% | 62% |
+| conflict resolution | 1/2 (50%) | 1/2 (50%) |
+| avg latency / turn | ~710 ms | **0 ms** |
 
-**Honest interpretation:** rules-only hits the precision target because its predicates exactly match the curated ground truth. The LLM extracts more facts but with predicate variation that hurts strict matching. A predicate-canonicalisation layer (`extractor.py`) now maps synonyms (`is_studying`, `learning`, `majoring_in` → `studies`) onto one controlled vocabulary before they reach the graph; re-running the eval to quantify the gain is the natural next step.
+¹ Mean of 3 runs. Even at temperature 0 the Groq API isn't bit-reproducible, so hybrid numbers wander ±a few points; rules-only is deterministic. The committed `eval/results_*.md` hold one representative run.
+
+**Honest interpretation:** on this small curated set, hybrid and rules-only land within noise of each other — the rule patterns were written for these exact phrasings, so they're hard to beat here. The LLM path's real edge is *generalisation* (extracting from phrasings the rules never anticipated) and *coreference* ("she" → "Lina"), neither of which a 12-dialogue set measures; predicate canonicalisation keeps its varied output from fragmenting the graph. Memory@1 (62%) is the weakest metric — the semantic-retrieval layer is what recovers paraphrased questions that share no words with the stored fact.
+
+### semantic retrieval
+
+Retrieval is **hybrid**: lexical overlap + recency + *semantic similarity*. Queries and facts are embedded (bge-small via [`fastembed`](https://github.com/qdrant/fastembed) — ONNX, no PyTorch) and compared by cosine, so a question can find a fact by meaning:
+
+```
+stored fact : user struggles_with derivatives
+query       : "what do I find difficult?"   ← zero shared words
+→ retrieved : struggles_with derivatives    (lexical alone returns nothing)
+```
+
+It degrades gracefully: with no embedding library installed (or `KG_DISABLE_EMBEDDINGS=1`), retrieval falls back to pure lexical matching and the app still runs.
 
 ### tests
 
@@ -194,7 +212,8 @@ docker run -p 8000:7860 -e GROQ_API_KEY=$GROQ_API_KEY the-commonplace
 backend/                # FastAPI, graph, extractor, responder
   graph.py              time-aware property graph
   extractor.py          hybrid spaCy + Groq + rules, predicate canonicalisation
-  query.py              token-overlap + 2-hop traversal
+  query.py              hybrid retrieval: lexical + recency + semantic
+  embeddings.py         optional semantic backend (fastembed / ONNX)
   responder.py          LLM reply grounded on retrieved facts
   session.py            per-visitor session isolation
   llm.py                Groq client

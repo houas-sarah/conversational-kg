@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import asyncio
 import json
+import threading
 import time
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import Any
 
@@ -12,6 +14,7 @@ from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
+from .embeddings import EMBEDDER
 from .extractor import HybridExtractor
 from .llm import GroqClient
 from .query import retrieve
@@ -57,7 +60,15 @@ class Hub:
             await self.remove(sid, ws)
 
 
-app = FastAPI(title="the commonplace — Conversational KG")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Précharge le modèle d'embeddings en tâche de fond : le premier message de
+    # l'utilisateur n'a pas à attendre le chargement (~1-2 s à froid).
+    threading.Thread(target=lambda: EMBEDDER.available, daemon=True).start()
+    yield
+
+
+app = FastAPI(title="the commonplace — Conversational KG", lifespan=lifespan)
 
 llm = GroqClient()
 extractor = HybridExtractor(llm)
@@ -92,6 +103,7 @@ def status(
         "llm_available": llm.available,
         "llm_model": llm.model if llm.available else None,
         "extraction_method": "hybrid (spaCy + Groq LLM)" if llm.available else "rules + spaCy",
+        "retrieval": f"semantic ({EMBEDDER.backend})" if EMBEDDER.available else "lexical",
         "stats": s.kg.stats(),
         "active_sessions": sessions.active_count,
     }

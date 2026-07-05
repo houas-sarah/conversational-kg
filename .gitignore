@@ -8,5 +8,5 @@ data/sessions/
 .pytest_cache/
 .DS_Store
 
-# reference PDFs — not part of the code
+# local documents
 *.pdf

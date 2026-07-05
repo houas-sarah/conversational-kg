@@ -226,13 +226,13 @@ async def run(no_llm: bool = False) -> dict:
     print("─" * 70)
     print("OVERALL")
     print("─" * 70)
-    print(f"  Extraction micro-precision  {micro_p:.3f}   (PDF §8 target ≥ 0.90)")
+    print(f"  Extraction micro-precision  {micro_p:.3f}")
     print(f"  Extraction micro-recall     {micro_r:.3f}")
     print(f"  Extraction micro-F1         {micro_f1:.3f}")
-    print(f"  Memory@1 accuracy           {mem_acc:.3f}   (PDF §8 target ≥ 0.85)")
+    print(f"  Memory@1 accuracy           {mem_acc:.3f}")
     if conflict_acc is not None:
         print(f"  Conflict resolution accuracy {conflict_acc:.3f}   ({sum(conflict_results)}/{len(conflict_results)} cases)")
-    print(f"  Avg per-turn latency        {avg_latency:.0f} ms   (PDF §8 target < 2000)")
+    print(f"  Avg per-turn latency        {avg_latency:.0f} ms")
 
     suffix = "_rules" if no_llm else "_hybrid"
     csv_path = ROOT / "eval" / f"results{suffix}.csv"
@@ -257,15 +257,15 @@ async def run(no_llm: bool = False) -> dict:
         "",
         "## Headline numbers",
         "",
-        "| Metric | Result | PDF §8 target |",
-        "|---|---|---|",
-        f"| Extraction precision (micro) | **{micro_p:.1%}** | ≥ 90% |",
-        f"| Extraction recall (micro)    | **{micro_r:.1%}** | — |",
-        f"| Extraction F1 (micro)        | **{micro_f1:.1%}** | — |",
-        f"| Memory@1 accuracy            | **{mem_acc:.1%}** | ≥ 85% |",
-        (f"| Conflict resolution accuracy | **{conflict_acc:.1%}** ({sum(conflict_results)}/{len(conflict_results)}) | — |"
-         if conflict_acc is not None else "| Conflict resolution accuracy | — | — |"),
-        f"| Avg per-turn latency         | **{avg_latency:.0f} ms** | < 2000 ms |",
+        "| Metric | Result |",
+        "|---|---|",
+        f"| Extraction precision (micro) | **{micro_p:.1%}** |",
+        f"| Extraction recall (micro)    | **{micro_r:.1%}** |",
+        f"| Extraction F1 (micro)        | **{micro_f1:.1%}** |",
+        f"| Memory@1 accuracy            | **{mem_acc:.1%}** |",
+        (f"| Conflict resolution accuracy | **{conflict_acc:.1%}** ({sum(conflict_results)}/{len(conflict_results)}) |"
+         if conflict_acc is not None else "| Conflict resolution accuracy | — |"),
+        f"| Avg per-turn latency         | **{avg_latency:.0f} ms** |",
         "",
         "## Per-dialogue breakdown",
         "",

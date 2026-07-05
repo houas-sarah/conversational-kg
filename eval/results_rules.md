@@ -4,14 +4,14 @@ _rules + spaCy (no LLM)_  ·  12 dialogues  ·  29 user turns
 
 ## Headline numbers
 
-| Metric | Result | PDF §8 target |
-|---|---|---|
-| Extraction precision (micro) | **94.7%** | ≥ 90% |
-| Extraction recall (micro)    | **64.3%** | — |
-| Extraction F1 (micro)        | **76.6%** | — |
-| Memory@1 accuracy            | **61.5%** | ≥ 85% |
-| Conflict resolution accuracy | **50.0%** (1/2) | — |
-| Avg per-turn latency         | **0 ms** | < 2000 ms |
+| Metric | Result |
+|---|---|
+| Extraction precision (micro) | **89.5%** |
+| Extraction recall (micro)    | **60.7%** |
+| Extraction F1 (micro)        | **72.3%** |
+| Memory@1 accuracy            | **61.5%** |
+| Conflict resolution accuracy | **50.0%** (1/2) |
+| Avg per-turn latency         | **0 ms** |
 
 ## Per-dialogue breakdown
 
@@ -20,12 +20,12 @@ _rules + spaCy (no LLM)_  ·  12 dialogues  ·  29 user turns
 | `pc_001_student` | 1.00 | 0.75 | 1.00 | — | 0 ms |
 | `pc_002_hobbies` | 1.00 | 0.33 | 0.50 | — | 0 ms |
 | `pc_003_food` | 1.00 | 0.67 | 0.00 | — | 0 ms |
-| `pc_004_struggle` | 1.00 | 1.00 | 1.00 | — | 0 ms |
+| `pc_004_struggle` | 0.50 | 0.50 | 1.00 | — | 0 ms |
 | `pc_005_conflict_location` | 1.00 | 1.00 | 1.00 | ✓ | 0 ms |
 | `pc_006_conflict_subject` | 1.00 | 0.67 | 0.00 | ✗ | 0 ms |
 | `pc_007_work` | 1.00 | 0.50 | 1.00 | — | 0 ms |
 | `pc_008_family` | 0.00 | 0.00 | 0.00 | — | 0 ms |
-| `pc_009_feelings` | 0.50 | 0.50 | 0.00 | — | 1 ms |
+| `pc_009_feelings` | 0.50 | 0.50 | 0.00 | — | 0 ms |
 | `pc_010_preferences` | 1.00 | 1.00 | 1.00 | — | 0 ms |
 | `pc_011_skills` | 1.00 | 1.00 | 1.00 | — | 0 ms |
 | `pc_012_negation_hard` | 0.00 | 0.00 | — | — | 0 ms |

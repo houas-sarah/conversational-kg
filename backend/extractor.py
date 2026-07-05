@@ -346,7 +346,9 @@ class HybridExtractor:
                     f"CONVERSATION SO FAR:\n{history or '(no earlier messages -- this is the first turn)'}\n\n"
                     f"NEW USER MESSAGE:\n{text}"
                 )
-                data = await self.llm.chat_json(LLM_SYSTEM, user_prompt, temperature=0.1, max_tokens=700)
+                # température 0 : l'extraction doit être déterministe et
+                # reproductible, pas créative.
+                data = await self.llm.chat_json(LLM_SYSTEM, user_prompt, temperature=0.0, max_tokens=700)
 
                 resolved = str(data.get("resolved_text", "") or "").strip()
                 if resolved:
