@@ -49,7 +49,11 @@ class _Embedder:
 
         try:
             from fastembed import TextEmbedding
-            self._model = TextEmbedding(_FASTEMBED_MODEL)
+            # KG_EMBED_CACHE permet de figer l'emplacement du modèle (utile en
+            # Docker : on le pré-télécharge au build pour éviter tout
+            # téléchargement au premier message). Non défini → cache par défaut.
+            cache_dir = os.getenv("KG_EMBED_CACHE") or None
+            self._model = TextEmbedding(_FASTEMBED_MODEL, cache_dir=cache_dir)
             self._backend = "fastembed"
             return
         except Exception:

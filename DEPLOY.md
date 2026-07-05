@@ -28,16 +28,17 @@ Three free options. The first is recommended — no credit card required.
    ```yaml
    ---
    title: the commonplace
-   emoji: ❋
-   colorFrom: yellow
-   colorTo: red
+   emoji: 🧠
+   colorFrom: indigo
+   colorTo: purple
    sdk: docker
    app_port: 7860
    pinned: false
    ---
    ```
 
-   Commit this in a branch like `hf-deploy` so it stays separate from your GitHub `main`.
+   This repo already ships an `hf-deploy` branch with that header added, so it
+   stays separate from your clean GitHub `main`.
 
 ### push the code
 
@@ -122,8 +123,9 @@ Open <http://localhost:8000>. If this works, deployment will work.
 
 ## persistence note
 
-The system writes the knowledge graph to `data/kg.json` inside the container.
+The system writes one knowledge-graph file per visitor session under
+`data/sessions/` inside the container.
 
-- **On Hugging Face Spaces (free tier):** the filesystem is *ephemeral* — the file persists across short restarts but will be wiped on a rebuild. For a long-lived demo, this is fine. For permanent storage, point `data/` at a real volume (HF Persistent Storage is a paid add-on).
+- **On Hugging Face Spaces (free tier):** the filesystem is *ephemeral* — files persist across short restarts but are wiped on a rebuild. For a live demo that's fine (each visitor already gets a fresh, isolated graph). For permanent storage, point `data/` at a real volume (HF Persistent Storage is a paid add-on).
 - **On Render:** also ephemeral on the free tier. Same caveat.
 - **For real persistence:** swap the JSON backend for a hosted database (SQLite on a volume, Neo4j Aura free tier, Supabase, etc.) — the `KnowledgeGraph` class in `backend/graph.py` has a clean interface for this.

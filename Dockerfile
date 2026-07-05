@@ -7,8 +7,13 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .
+# Pré-télécharge le modèle d'embeddings dans l'image (KG_EMBED_CACHE) pour que
+# le premier message n'attende aucun téléchargement au démarrage.
+ENV KG_EMBED_CACHE=/app/models
 RUN pip install --no-cache-dir -r requirements.txt && \
-    python -m spacy download en_core_web_sm
+    python -m spacy download en_core_web_sm && \
+    python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/app/models')" && \
+    chmod -R 755 /app/models
 
 COPY backend/ ./backend/
 COPY frontend/ ./frontend/
