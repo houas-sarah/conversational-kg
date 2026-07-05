@@ -12,7 +12,9 @@ COPY requirements.txt .
 ENV KG_EMBED_CACHE=/app/models
 RUN pip install --no-cache-dir -r requirements.txt && \
     python -m spacy download en_core_web_sm && \
-    python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/app/models')" && \
+    mkdir -p /app/models && \
+    (python -c "from fastembed import TextEmbedding; TextEmbedding('BAAI/bge-small-en-v1.5', cache_dir='/app/models')" \
+        || echo "embed model pre-cache skipped — it will download at runtime") && \
     chmod -R 755 /app/models
 
 COPY backend/ ./backend/
