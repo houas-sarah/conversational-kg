@@ -72,9 +72,9 @@ class SessionManager:
         return self.dir / f"{h}.json"
 
     def get(self, sid: str) -> Session:
-        """Fetch (or lazily create + load) the session for ``sid``."""
+        """Récupère (ou crée + charge à la demande) la session du ``sid``."""
         with self._lock:
-            self._evict_idle()
+            self._evict_idle()  # purge les sessions inactives à chaque accès
             s = self._sessions.get(sid)
             if s is None:
                 s = Session(

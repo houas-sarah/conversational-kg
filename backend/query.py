@@ -74,6 +74,7 @@ def retrieve(kg: KnowledgeGraph, text: str, k: int = 8) -> RetrievedContext:
             overlap = len(set(_tokens(fact_text)) & toks)
             age = max(0.0, now - f.last_active_at)
             recency = math.exp(-age / _RECENCY_HALF_LIFE_S)
+            # Score = confiance + recouvrement lexical + fraîcheur (déclin exponentiel)
             score = f.confidence + 0.5 * overlap + 0.4 * recency
             if f.valid_until is not None:
                 score -= 0.3  # past facts rank below current ones

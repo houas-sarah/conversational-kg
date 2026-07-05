@@ -334,6 +334,9 @@ class HybridExtractor:
         when it returns zero triples (e.g. for a question). The rule path
         runs only when the LLM is unavailable or threw.
         """
+        # Approche hybride : spaCy repère d'abord les entités nommées, puis le
+        # LLM (s'il est dispo) extrait les triplets et résout les pronoms. En
+        # l'absence de clé API, on se rabat sur les règles regex plus bas.
         entities = _spacy_entities(text)
         resolved_text = text
 

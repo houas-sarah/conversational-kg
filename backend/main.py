@@ -57,7 +57,7 @@ class Hub:
             await self.remove(sid, ws)
 
 
-app = FastAPI(title="Dynamic KG Conversational AI")
+app = FastAPI(title="the commonplace — Conversational KG")
 
 llm = GroqClient()
 extractor = HybridExtractor(llm)
@@ -145,8 +145,9 @@ async def _process_turn(sid: str, text: str) -> dict:
     turn = s.turns
     t0 = time.time()
 
-    # Short-term memory: the recent dialogue. The extractor uses it to resolve
-    # pronouns ("she" -> "Lina") before any triple touches the graph.
+    # Mémoire courte : les derniers tours de dialogue. L'extracteur s'en sert
+    # pour résoudre les pronoms ("she" -> "Lina") avant que le moindre triplet
+    # ne touche le graphe.
     history = s.convo.transcript()
 
     extraction = await extractor.extract(text, history)
@@ -189,8 +190,8 @@ async def _process_turn(sid: str, text: str) -> dict:
             if key in kg.g:
                 kg.g.nodes[key]["kind"] = kind
 
-    # Retrieve against the resolved text so a query like "what is she studying?"
-    # actually matches the entity it refers to.
+    # On interroge le graphe avec le texte résolu : ainsi "what is she studying?"
+    # retrouve bien l'entité à laquelle "she" fait référence.
     ctx = retrieve(kg, resolved)
     reply = await responder.reply(ctx, new_facts, text, history)
 

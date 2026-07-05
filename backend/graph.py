@@ -208,8 +208,9 @@ class KnowledgeGraph:
             subj_n, obj_n = _norm(subject), _norm(obj)
             is_active_assertion = valid_until is None
 
-            # Reinforcement: the same active triple stated again strengthens
-            # the existing fact rather than adding a duplicate edge.
+            # Renforcement : si l'utilisateur répète exactement le même fait
+            # actif, on le renforce (confiance + récence) au lieu de dupliquer
+            # l'arête dans le graphe.
             if is_active_assertion:
                 for f in self.facts.values():
                     if (
@@ -224,10 +225,11 @@ class KnowledgeGraph:
                         self._update_edge(f)
                         return f, []
 
-            # Conflict resolution — only an *active* assertion can close
-            # existing facts. Two triggers:
-            #   1. one-to-one predicates: same (subject, predicate), new object
-            #   2. exclusivity families: same (subject, object), sibling predicate
+            # Résolution de conflit — seule une assertion *active* peut fermer
+            # des faits existants. Deux déclencheurs :
+            #   1. prédicats un-à-un : même (sujet, prédicat), objet différent
+            #   2. familles d'exclusivité : même (sujet, objet), prédicat frère
+            #      (ex. "comprend" ferme "a du mal avec" sur le même objet)
             superseded: list[Fact] = []
             if is_active_assertion:
                 family = self._FAMILY_OF.get(predicate)
