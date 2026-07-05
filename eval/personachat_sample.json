@@ -1,0 +1,155 @@
+{
+  "schema": {
+    "_comment": "Each dialogue is a sequence of user utterances. Ground-truth triples are written in the same lowercase snake-case form the system produces. memory_probes test recall: after ingesting all turns, query the system with the probe and check the expected fact comes back.",
+    "fields": ["dialogue_id", "turns", "memory_probes", "conflict_check"]
+  },
+  "dialogues": [
+    {
+      "dialogue_id": "pc_001_student",
+      "description": "PersonaChat-style: student introduces themselves",
+      "turns": [
+        {"text": "My name is Sarah.", "ground_truth": [["user", "named", "sarah"]]},
+        {"text": "I'm a computer science student.", "ground_truth": [["user", "studies", "computer science"]]},
+        {"text": "I love coffee.", "ground_truth": [["user", "loves", "coffee"]]},
+        {"text": "I live in Algiers.", "ground_truth": [["user", "lives_in", "algiers"]]}
+      ],
+      "memory_probes": [
+        {"question": "What's my name?", "expected_predicate": "named", "expected_object": "sarah"},
+        {"question": "Where do I live?", "expected_predicate": "lives_in", "expected_object": "algiers"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_002_hobbies",
+      "description": "Multiple preferences (multi-value predicate)",
+      "turns": [
+        {"text": "I love painting.", "ground_truth": [["user", "loves", "painting"]]},
+        {"text": "I also love hiking.", "ground_truth": [["user", "loves", "hiking"]]},
+        {"text": "I enjoy reading novels.", "ground_truth": [["user", "likes", "reading novels"]]}
+      ],
+      "memory_probes": [
+        {"question": "What do I love?", "expected_predicate": "loves", "expected_object": "painting"},
+        {"question": "What do I love?", "expected_predicate": "loves", "expected_object": "hiking"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_003_food",
+      "description": "Food preferences with a dislike",
+      "turns": [
+        {"text": "I love sushi.", "ground_truth": [["user", "loves", "sushi"]]},
+        {"text": "I hate broccoli.", "ground_truth": [["user", "dislikes", "broccoli"]]},
+        {"text": "Pizza is my favorite.", "ground_truth": [["user", "likes", "pizza"]]}
+      ],
+      "memory_probes": [
+        {"question": "What's my favorite food?", "expected_predicate": "likes", "expected_object": "pizza"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_004_struggle",
+      "description": "Academic struggle and progress",
+      "turns": [
+        {"text": "I'm struggling with calculus.", "ground_truth": [["user", "struggles_with", "calculus"]]},
+        {"text": "I need help with derivatives.", "ground_truth": [["user", "needs_help_with", "derivatives"]]}
+      ],
+      "memory_probes": [
+        {"question": "What am I struggling with?", "expected_predicate": "struggles_with", "expected_object": "calculus"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_005_conflict_location",
+      "description": "Temporal conflict on lives_in",
+      "turns": [
+        {"text": "I live in Paris.", "ground_truth": [["user", "lives_in", "paris"]]},
+        {"text": "I just moved. I live in Tokyo now.", "ground_truth": [["user", "lives_in", "tokyo"]]}
+      ],
+      "memory_probes": [
+        {"question": "Where do I live?", "expected_predicate": "lives_in", "expected_object": "tokyo"}
+      ],
+      "conflict_check": {
+        "predicate": "lives_in",
+        "final_object": "tokyo",
+        "should_supersede_count": 1
+      }
+    },
+    {
+      "dialogue_id": "pc_006_conflict_subject",
+      "description": "Subject focus shifting over time",
+      "turns": [
+        {"text": "I'm studying biology this term.", "ground_truth": [["user", "studies", "biology"]]},
+        {"text": "I'm studying chemistry now.", "ground_truth": [["user", "studies", "chemistry"]]},
+        {"text": "Actually I switched to physics.", "ground_truth": [["user", "studies", "physics"]]}
+      ],
+      "memory_probes": [
+        {"question": "What do I study?", "expected_predicate": "studies", "expected_object": "physics"}
+      ],
+      "conflict_check": {
+        "predicate": "studies",
+        "final_object": "physics",
+        "should_supersede_count": 2
+      }
+    },
+    {
+      "dialogue_id": "pc_007_work",
+      "description": "Work and profession",
+      "turns": [
+        {"text": "I work at Google.", "ground_truth": [["user", "works_at", "google"]]},
+        {"text": "I'm a software engineer.", "ground_truth": [["user", "is", "software engineer"]]}
+      ],
+      "memory_probes": [
+        {"question": "Where do I work?", "expected_predicate": "works_at", "expected_object": "google"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_008_family",
+      "description": "Family relationships (entity-to-entity, not just user-attribute)",
+      "turns": [
+        {"text": "My sister is named Amelia.", "ground_truth": [["sister", "named", "amelia"]]},
+        {"text": "I have two cats.", "ground_truth": [["user", "has", "cats"]]}
+      ],
+      "memory_probes": [
+        {"question": "Do I have pets?", "expected_predicate": "has", "expected_object": "cats"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_009_feelings",
+      "description": "Emotional state",
+      "turns": [
+        {"text": "I feel exhausted today.", "ground_truth": [["user", "feels", "exhausted"]]},
+        {"text": "I'm happy I finished the project.", "ground_truth": [["user", "feels", "happy"]]}
+      ],
+      "memory_probes": [
+        {"question": "How am I feeling?", "expected_predicate": "feels", "expected_object": "happy"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_010_preferences",
+      "description": "Lifestyle preferences",
+      "turns": [
+        {"text": "I prefer studying in the evening.", "ground_truth": [["user", "prefers", "studying in the evening"]]},
+        {"text": "I love jazz music.", "ground_truth": [["user", "loves", "jazz music"]]}
+      ],
+      "memory_probes": [
+        {"question": "What music do I like?", "expected_predicate": "loves", "expected_object": "jazz music"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_011_skills",
+      "description": "Skills and knowledge",
+      "turns": [
+        {"text": "I know Python.", "ground_truth": [["user", "knows", "python"]]},
+        {"text": "I understand machine learning.", "ground_truth": [["user", "understands", "machine learning"]]}
+      ],
+      "memory_probes": [
+        {"question": "What programming languages do I know?", "expected_predicate": "knows", "expected_object": "python"}
+      ]
+    },
+    {
+      "dialogue_id": "pc_012_negation_hard",
+      "description": "Negation — known weakness, mainly tests that the system at least doesn't extract the affirmative",
+      "turns": [
+        {"text": "I don't like onions.", "ground_truth": [["user", "dislikes", "onions"]]},
+        {"text": "I'm not a vegetarian.", "ground_truth": []}
+      ],
+      "memory_probes": []
+    }
+  ]
+}

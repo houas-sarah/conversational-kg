@@ -1,0 +1,17 @@
+.venv
+venv
+__pycache__
+*.pyc
+.pytest_cache
+.git
+.gitignore
+.env
+data/kg.json
+*.md
+!README.md
+docs/
+tests/
+eval/results_*.csv
+eval/results_*.md
+*.pdf
+.DS_Store

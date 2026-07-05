@@ -1,0 +1,12 @@
+.env
+__pycache__/
+*.pyc
+.venv/
+venv/
+data/kg.json
+data/sessions/
+.pytest_cache/
+.DS_Store
+
+# reference PDFs — not part of the code
+*.pdf

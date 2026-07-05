@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Dynamic KG · Conversational Memory</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Fira+Code:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/static/styles.css" />
+</head>
+<body>
+  <!-- ── Top bar ─────────────────────────────────────────────────── -->
+  <header class="topbar">
+    <div class="brand">
+      <svg class="brand__mark" viewBox="0 0 32 32" aria-hidden="true">
+        <line x1="9" y1="10" x2="22" y2="21" />
+        <line x1="22" y1="21" x2="24" y2="9" />
+        <line x1="9" y1="10" x2="24" y2="9" />
+        <circle class="bn1" cx="9" cy="10" r="3.4" />
+        <circle class="bn2" cx="22" cy="21" r="4.4" />
+        <circle class="bn3" cx="24" cy="9" r="2.6" />
+      </svg>
+      <div class="brand__text">
+        <div class="brand__name">Dynamic KG</div>
+        <div class="brand__tag">A chatbot that remembers — drawn as a knowledge graph</div>
+      </div>
+    </div>
+    <div class="meta">
+      <div class="meta__cell">
+        <span class="meta__k">session</span>
+        <span class="meta__v" id="session-id">00</span>
+      </div>
+      <div class="meta__cell">
+        <span class="meta__k">extraction</span>
+        <span class="meta__v" id="method">—</span>
+      </div>
+      <div class="meta__cell">
+        <span class="meta__k">status</span>
+        <span class="meta__v status status--off" id="status">offline</span>
+      </div>
+    </div>
+  </header>
+
+  <!-- ── Main stage ──────────────────────────────────────────────── -->
+  <main class="stage">
+
+    <!-- Graph panel -->
+    <section class="panel panel--graph">
+      <div class="panel__head">
+        <div class="panel__titles">
+          <h2 class="panel__title">Knowledge Graph</h2>
+          <p class="panel__sub">People, topics &amp; facts I've picked up from you — each one timestamped</p>
+        </div>
+        <button id="btn-reset" class="btn-ghost" title="Clear the graph and start over">Reset</button>
+      </div>
+
+      <div class="legend">
+        <span class="legend__item"><i class="swatch swatch--person"></i>person</span>
+        <span class="legend__item"><i class="swatch swatch--subject"></i>topic</span>
+        <span class="legend__item"><i class="swatch swatch--concept"></i>concept</span>
+        <span class="legend__item"><i class="swatch swatch--location"></i>place</span>
+        <span class="legend__item"><i class="swatch swatch--time"></i>time</span>
+        <span class="legend__item"><i class="swatch swatch--new"></i>just added</span>
+      </div>
+
+      <div class="canvas">
+        <svg id="graph" aria-label="Knowledge graph visualization"></svg>
+        <div class="canvas__empty" id="canvas-empty">
+          <div class="canvas__empty-mark">◇</div>
+          <p>Your knowledge graph is empty.</p>
+          <p class="dim">Say something in the chat — a name, a place, what you're studying —
+            and watch the facts appear here as connected nodes.</p>
+        </div>
+      </div>
+
+      <div class="callouts">
+        <div class="callouts__head">Extracted this turn</div>
+        <ul id="callouts-list" class="callouts__list"></ul>
+      </div>
+    </section>
+
+    <!-- Chat panel -->
+    <section class="panel panel--chat">
+      <div class="panel__head">
+        <div class="panel__titles">
+          <h2 class="panel__title">Conversation</h2>
+          <p class="panel__sub">Chat normally — I extract and remember as we go</p>
+        </div>
+      </div>
+
+      <div class="transcript" id="transcript">
+        <div class="welcome" id="welcome">
+          <div class="welcome__badge">How this works</div>
+          <p>I'm a chatbot with a <strong>memory</strong>. As we talk, I pick out the people,
+            places and topics you mention and store them in the graph on the left.</p>
+          <p>I also <strong>follow the conversation</strong>: introduce someone, then say
+            “she”, “he” or “it”, and I'll know who you mean. Ask me later — I'll recall it.</p>
+          <div class="welcome__try-label">New here? Send these three in order:</div>
+          <div class="welcome__tries">
+            <button class="try">My friend Lina studies physics at Riverside University.</button>
+            <button class="try">She's been struggling with quantum mechanics.</button>
+            <button class="try">What is she working on?</button>
+          </div>
+        </div>
+      </div>
+
+      <form id="composer" class="composer" autocomplete="off">
+        <span class="composer__prefix">›</span>
+        <input id="input" name="text" type="text"
+               placeholder="Tell me something, or ask what I remember…" maxlength="500" />
+        <button type="submit" class="composer__send">Send</button>
+      </form>
+    </section>
+
+  </main>
+
+  <!-- ── Status bar ──────────────────────────────────────────────── -->
+  <footer class="statusbar">
+    <div class="stat"><span class="stat__k">nodes</span><span class="stat__v" id="t-nodes">0</span></div>
+    <div class="stat"><span class="stat__k">edges</span><span class="stat__v" id="t-edges">0</span></div>
+    <div class="stat"><span class="stat__k">superseded</span><span class="stat__v" id="t-conflicts">0</span></div>
+    <div class="stat"><span class="stat__k">last turn</span><span class="stat__v" id="t-turn">—</span></div>
+    <div class="stat stat--push"><span class="stat__k">latency</span><span class="stat__v" id="t-latency">—</span></div>
+    <div class="stat"><span class="stat__k">backend</span><span class="stat__v" id="t-backend">connecting…</span></div>
+  </footer>
+
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="/static/app.js"></script>
+</body>
+</html>
