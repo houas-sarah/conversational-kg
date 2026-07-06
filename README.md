@@ -9,13 +9,14 @@ you send is parsed into triples, stamped with a timestamp, and merged into a
 graph that grows and corrects itself across turns. The graph is the chatbot's
 long-term memory — and you can watch it form in real time.
 
+[![Live demo](https://img.shields.io/badge/%F0%9F%A4%97_live_demo-Hugging_Face-ffbd00.svg)](https://huggingface.co/spaces/sarahouas/conversational-kg)
 [![Python 3.12](https://img.shields.io/badge/python-3.12-3776ab.svg?logo=python&logoColor=white)](https://www.python.org/)
 [![FastAPI](https://img.shields.io/badge/FastAPI-009688.svg?logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
 [![D3.js](https://img.shields.io/badge/D3.js-F9A03C.svg?logo=d3.js&logoColor=white)](https://d3js.org/)
 [![Groq](https://img.shields.io/badge/Groq-Llama_3.1-f55036.svg)](https://groq.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-yellow.svg)](LICENSE)
 
-[**what it does**](#what-it-does) · [**run it**](#run-it) · [**how it works**](#how-it-works) · [**evaluation**](#evaluation) · [**deploy**](#deploy)
+[**▶ live demo**](https://huggingface.co/spaces/sarahouas/conversational-kg) · [**what it does**](#what-it-does) · [**run it**](#run-it) · [**how it works**](#how-it-works) · [**evaluation**](#evaluation) · [**deploy**](#deploy)
 
 </div>
 
